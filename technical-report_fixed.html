@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术报告 | Technical Report</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Josefin Sans 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+    <!-- 阿里妈妈字体 -->
+    <link rel="stylesheet" href="https://at.alicdn.com/t/c/font_3774118_98h3w3c348.css">
+	
+	<script>
+        // 配置Tailwind自定义主题
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a1a',
+                        secondary: '#666666',
+                        accent: '#ff3e00',
+                        light: '#f5f5f5',
+                        dark: '#121212'
+                    },
+                    fontFamily: {
+                        'josefin': ['"Josefin Sans"', 'sans-serif'],
+                        'alimama': ['"Alimama FangYuan"', 'sans-serif']
+                    },
+                }
+            }
+        }
+    </script>
+	
+	<script>
+	// 配置MathJax - 保持原有样式
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            },
+            options: {
+                // 防止MathJax样式被覆盖
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                renderActions: {
+                    // 保护MathJax的字体设置
+                    addMenu: [0, '', '']
+                }
+            }
+        };
+	</script>
+	
+	<style type="text/tailwindcss">
+        @layer utilities {
+            .text-balance {
+                text-wrap: balance;
+            }
+            .content-visibility-auto {
+                content-visibility: auto;
+            }
+            .section-fade-in {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            }
+            .section-visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 全局样式 */
+        body {
+            font-feature-settings: "palt";
+            letter-spacing: 0.02em;
+        }
+        
+        /* 英文使用Josefin Sans */
+        :lang(en) {
+            font-family: 'Josefin Sans', sans-serif !important;
+        }
+        
+        /* 中文使用阿里妈妈字体 */
+        :lang(zh) {
+            font-family: "Alimama FangYuan", sans-serif !important;
+        }
+        
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 图片悬停效果 */
+        .img-hover-zoom {
+            overflow: hidden;
+        }
+        .img-hover-zoom img {
+            transition: transform 0.5s ease;
+        }
+        .img-hover-zoom:hover img {
+            transform: scale(1.03);
+        }
+		.MathJax, .MathJax * {
+			font-family: "mathjax-tex" !important; /* 重置字体家族 */
+			font-size: initial !important;   /* 重置字体大小 */
+			color: initial !important;       /* 重置字体颜色 */
+			/* 添加其他你需要重置的属性 */
+		}
+		.math-container {
+			font-family: 'mathjax-tex' !important;
+			font-size: 20px;
+		}
+    
+        
+	</style>
+	
+	<!-- 引入Prism.js样式和脚本 -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+	<!-- 按需引入语言支持 -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+	<!-- 引入MathJax -->
+	<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+	
+	
+    
+</head>
+
+<body class="bg-light text-primary antialiased">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+        <nav class="container mx-auto px-4 md:px-8 py-6 flex justify-between items-center">
+            <div class="flex items-center space-x-1">
+                <span class="text-2xl font-josefin font-bold tracking-wider" lang="en" style="color:gray;">Lucky</span>
+				<span class="text-2xl font-josefin font-bold tracking-wider" lang="en">Model</span>
+                <span class="h-4 w-px bg-primary/30 mx-2"></span>
+                <span class="text-lg font-alimama" lang="zh">TECH REPORT</span>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <ul class="hidden md:flex space-x-8 items-center">
+                <li><a href="#intro" class="font-josefin hover:text-accent transition-colors" lang="en">Introduction</a></li>
+                <li><a href="#methodology" class="font-josefin hover:text-accent transition-colors" lang="en">Methodology</a></li>
+                <li><a href="#results" class="font-josefin hover:text-accent transition-colors" lang="en">Results</a></li>
+                <li><a href="#discussion" class="font-alimama hover:text-accent transition-colors" lang="zh">讨论</a></li>
+                <li><a href="#conclusion" class="font-josefin hover:text-accent transition-colors" lang="en">Conclusion</a></li>
+            </ul>
+            
+            <!-- 移动端菜单按钮 -->
+            <button class="md:hidden text-xl" id="menuToggle">
+                <i class="fa fa-bars"></i>
+            </button>
+        </nav>
+        
+        <!-- 移动端导航菜单 -->
+        <div class="md:hidden bg-white shadow-lg absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none" id="mobileMenu">
+            <ul class="container mx-auto px-4 py-4 flex flex-col space-y-4">
+                <li><a href="#intro" class="block py-2 font-josefin" lang="en">Introduction</a></li>
+                <li><a href="#methodology" class="block py-2 font-josefin" lang="en">Methodology</a></li>
+                <li><a href="#results" class="block py-2 font-josefin" lang="en">Results</a></li>
+                <li><a href="#discussion" class="block py-2 font-alimama" lang="zh">讨论</a></li>
+                <li><a href="#conclusion" class="block py-2 font-josefin" lang="en">Conclusion</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-32 pb-20 md:pt-40 md:pb-32 px-4 md:px-8">
+        <div class="container mx-auto max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                <div class="md:col-span-8">
+					<!--
+                    <div class="inline-block px-3 py-1 border border-primary/20 rounded-full mb-6">
+                        <span class="text-sm font-josefin tracking-wider" lang="en">TECHNICAL REPORT</span>
+                    </div>
+					 -->
+                    <h1 class="text-4xl md:text-6xl lg:text-7xl font-josefin font-bold leading-tight mb-6" lang="en">
+                        Train a Unified <br>
+                        <span class="text-accent">Multimodal Understanding and Generation Model </span> <br>
+						from Scratch
+                    </h1>
+					<!--
+                    <p class="text-xl md:text-2xl text-secondary max-w-xl mb-8 font-alimama leading-relaxed" lang="zh">
+                        本报告探讨了新一代系统模型的设计原理与应用前景，结合理论分析与实验数据，为技术发展提供方向参考。
+                    </p>
+					-->
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-secondary">
+                        <div class="flex items-center">
+                            <!--<i class="fa fa-calendar-o mr-2"></i> -->
+                            <span class="font-josefin" lang="en">September 2025</span>
+                        </div>
+                        <div class="h-3 w-px bg-secondary/30"></div>
+                        <div class="flex items-center">
+                            <!--<i class="fa fa-clock-o mr-2"></i> -->
+                            <span class="font-josefin" lang="en">15 min read</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-4 img-hover-zoom">
+                    <img src="../pic_7_0_img7.png" alt="抽象插图" class="w-full h-auto object-cover rounded-lg shadow-xl">
+					<p class="text-sm text-secondary font-josefin text-center" lang="en">
+						A sampling in the early stages of model training &#128514;
+					</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 目录 -->
+	<!--
+    <section class="py-12 bg-white">
+        <div class="container mx-auto max-w-6xl px-4 md:px-8">
+            <div class="border-l-4 border-accent pl-6 mb-10">
+                <h2 class="text-2xl md:text-3xl font-josefin font-semibold" lang="en">Table of Contents</h2>
+                <p class="text-secondary mt-2 font-alimama" lang="zh">报告内容概览</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex items-start group">
+                    <span class="text-4xl font-josefin font-bold text-accent/20 group-hover:text-accent transition-colors mr-4">01</span>
+                    <div>
+                        <h3 class="text-xl font-josefin font-semibold mb-2 group-hover:text-accent transition-colors" lang="en">Introduction</h3>
+                        <p class="text-secondary font-alimama" lang="zh">研究背景、目的与意义概述</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start group">
+                    <span class="text-4xl font-josefin font-bold text-accent/20 group-hover:text-accent transition-colors mr-4">02</span>
+                    <div>
+                        <h3 class="text-xl font-josefin font-semibold mb-2 group-hover:text-accent transition-colors" lang="en">Methodology</h3>
+                        <p class="text-secondary font-alimama" lang="zh">研究方法与模型构建过程</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start group">
+                    <span class="text-4xl font-josefin font-bold text-accent/20 group-hover:text-accent transition-colors mr-4">03</span>
+                    <div>
+                        <h3 class="text-xl font-josefin font-semibold mb-2 group-hover:text-accent transition-colors" lang="en">Results</h3>
+                        <p class="text-secondary font-alimama" lang="zh">实验结果与数据分析</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start group">
+                    <span class="text-4xl font-josefin font-bold text-accent/20 group-hover:text-accent transition-colors mr-4">04</span>
+                    <div>
+                        <h3 class="text-xl font-josefin font-semibold mb-2 group-hover:text-accent transition-colors" lang="zh">讨论</h3>
+                        <p class="text-secondary font-alimama" lang="zh">结果解读与关键发现探讨</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start group md:col-span-2">
+                    <span class="text-4xl font-josefin font-bold text-accent/20 group-hover:text-accent transition-colors mr-4">05</span>
+                    <div>
+                        <h3 class="text-xl font-josefin font-semibold mb-2 group-hover:text-accent transition-colors" lang="en">Conclusion</h3>
+                        <p class="text-secondary font-alimama" lang="zh">研究总结、局限与未来展望</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+	 -->
+
+    <!-- 引言部分 -->
+    <section id="intro" class="py-20 bg-white section-fade-in">
+        <div class="container mx-auto max-w-6xl px-4 md:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+                <div class="md:col-span-12">
+                    <span class="text-sm font-josefin uppercase tracking-widest text-accent" lang="en">Section 01</span>
+                    <h2 class="text-3xl md:text-4xl font-josefin font-bold mt-2 mb-8" lang="en">Abstract</h2>
+						<!--
+                        <p class="text-lg leading-relaxed font-alimama" lang="zh">
+                            在数字化转型加速推进的今天，系统模型的设计与优化成为技术创新的核心驱动力。本研究聚焦于新一代复杂系统的建模方法，旨在解决传统模型在处理大规模、高动态性数据时面临的效率与精度瓶颈。
+                        </p>
+                        -->
+						
+                        <p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+                            This study proposes a unified multimodal understanding and generation framework. Our framework employs continuous representation of an image tokens for both understanding and generation, combining autoregressive language modeling with diffusion. It also decouples the visual encoding for multimodal understanding and generation while processing different modal data with the same Transformer architecture. We trained the model from scratch on a mixture of text and image data. This study specifically implements an autoregressive-diffusion hybrid architecture, with all experiments conducted on a single AMD 7900XTX GPU for training and validation.
+                        </p>
+						<br><br>
+						
+                        <!--
+                        <blockquote class="border-l-4 border-accent pl-6 italic text-secondary my-8">
+                            <p class="text-lg font-alimama" lang="zh">
+                                "模型的价值不仅在于其对现实的抽象能力，更在于其指导实践、预测未来的可能性。"
+                            </p>
+                        </blockquote>
+						 -->
+                        <!--
+                        <p class="text-lg leading-relaxed font-alimama" lang="zh">
+                            本报告整合了跨学科研究成果，结合计算机科学、数学与工程学的理论框架，提出了一套全新的模型设计方法论。通过实际案例验证，该方法能够显著提升系统的响应速度与决策准确性。
+                        </p>
+						-->
+                </div>
+				<div class="md:col-span-5 p-6 bg-light rounded-lg border border-gray-100">
+					<h3 class="text-lg font-josefin font-semibold mb-4" lang="en">Key Approaches</h3>
+					<ul class="space-y-3 font-alimama" lang="en">
+						<li class="flex items-start">
+							<span>• A gating architecture based on cross-attention mechanism and direct concatenation</span>
+						</li>
+						<li class="flex items-start">
+							<span>• Visual understanding and image generation adopt a decoupled architecture</span>
+						</li>
+						<li class="flex items-start">
+							<span>• Multi-stage progressive training</span>
+						</li>
+						<li class="flex items-start">
+							<span>• VAE-free end-to-end image generation architecture</span>
+						</li>
+					</ul>
+				</div>
+				<div class="md:col-span-7 top-32">
+					<div class="rounded-lg overflow-hidden mb-6">
+						<img src="arc0.png" alt="Overall architecture of the model" class="w-full h-auto">
+					</div>
+					<p class="text-sm text-secondary italic font-josefin" lang="en">
+						Overall architecture of the model
+					</p>
+				</div>
+                
+                <div class="md:col-span-4 flex flex-col justify-center">
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 方法论部分 -->
+    <section id="methodology" class="py-20 section-fade-in">
+        <div class="container mx-auto max-w-6xl px-4 md:px-8">
+			<div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+				<div class="md:col-span-12">
+					<span class="text-sm font-josefin uppercase tracking-widest text-accent" lang="en">Section 02</span>
+					<h2 class="text-3xl md:text-4xl font-josefin font-bold mt-2 mb-8" lang="en">Methodology</h2>      
+					<h3 class="text-2xl font-josefin font-semibold" lang="en">Model Architecture</h3>
+                </div>
+				<div class="md:col-span-7" id="textContent">
+					<h4 class="text-2xl font-josefin font-light" lang="en">Multimodel Understanding</h4>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						Current multimodal large models typically employ pre-trained LLMs as their backbone network, where visual modality information is first tokenized through a visual encoder before being fused with text tokens. During training, these two modalities are aligned to achieve multimodal understanding capabilities. There are two predominant approaches for fusing visual and textual information:  Direct concatenation, Visual tokens and text tokens are simply concatenated and injected into the LLM for autoregressive generation; Cross-attention injection, Text information is injected into different layers of the language model backbone via cross-attention mechanisms.
+
+					</p>
+					
+				</div>
+				<div class="md:col-span-5" id="imageContainer">
+					<div class="rounded-lg overflow-hidden">
+						<img src="arc.png" alt="Architecture of the Multimodal Understanding model" class="w-full h-auto">
+					</div>
+					<p class="text-sm text-secondary italic font-josefin" lang="en">
+						Architecture of the Multimodal Understanding model
+					</p>
+				</div>
+				<div class="md:col-span-12">
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						Previous research[@laurenconWhatMattersWhen2024] found that direct concatenation generally outperforms cross-attention injection when training language backbone models. However, while the multi-head self-attention mechanism computes attention scores with O(n²) complexity, direct concatenation increases sequence length, leading to a significant surge in computational load. To reduce computational costs, some lightweight multimodal models still opt for cross-attention architectures. To combine the advantages of both approaches, this study proposes a multi-scale multimodal fusion method.
+					</p>
+					
+				</div>
+				<div class="md:col-span-12">
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						This study processes images through a visual encoder followed by further compression via downsampling. Similar to OmniVLM[@chenOmniVLMTokenCompressedSubBillionParameter2024], we employ a 1D convolutional layer (kernel size 𝑘 = 9, stride 𝑠 = 9, no padding) to minimize the number of tokens concatenated into the context. Additionally, intermediate layers from the visual encoder with higher fine-grained features are incorporated through cross-attention operations at each decoder layer. The output from the final cross-attention layer is gated and weighted before being summed with the attention layer output, with the combined result subsequently fed into the FFN layer:
+					</p>
+					<br>
+					<!-- 行内公式示例 -->
+					<p>
+					  <img src="result1.svg" alt="SVG Image" height="200" style="display: block; margin: 0 auto;">
+					</p>
+					<br>
+					<p>
+					  <img src="result2.svg" alt="SVG Image" height="200" style="display: block; margin: 0 auto;">
+					</p>
+				</div>
+				<div class="md:col-span-12">
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						<b>2D Rotary Position Embedding:</b> Early multimodal large models often lacked specialized positional encoding for visual data, simply flattening tokens from all modalities and applying standard 1D positional encoding. Subsequent research[@SuJianLinBiMenZaoCheZhiDuoMoTaiSiLuQianTanSanWeiZhiBianMa2024], [@baiQwen25VLTechnicalReport2025] extended RoPE-1D to two or even three dimensions - intuitively allocating half the positional features to the first dimension and the remaining half to the second dimension. This approach offers dual advantages: it more effectively models positional relationships between adjacent image patches while maintaining compatibility with the backbone network's pretrained positional encoding capabilities. Notably, RoPE-2D automatically reduces to RoPE-1D when the context contains only text tokens. Our study adopts this positional encoding scheme as well. Since the visual tokens in the self-attention layer are derived from downsampled visual encoder outputs, we replicate each token in the cross-attention layer by the downsampling factor to maintain positional index correspondence and achieve spatial alignment.					</p>
+					</p>
+				</div>
+				<div class="md:col-span-5" id="imageContainer">
+					<div class="rounded-lg overflow-hidden">
+						<img src="2dpos.png" alt="RoPE-2D" class="w-full h-auto">
+					</div>
+					<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+						RoPE-2D
+					</p>
+				</div>
+				<div class="md:col-span-2">
+				</div>
+				<div class="md:col-span-5" id="imageContainer">
+					<div class="rounded-lg overflow-hidden">
+						<img src="causalmask.png" alt="Causal mask" class="w-full h-auto">
+					</div>
+					<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+						Causal mask
+					</p>
+				</div>
+				<div class="md:col-span-12">
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						<b>Causal mask:</b> We enable information interaction between different patches from the same image to achieve local bidirectional attention effects. To maintain compatibility with autoregressive tasks, text tokens still preserve unidirectional attention through causal masking. 					</p>
+					</p>
+				</div>
+				<div class="md:col-span-12" id="textContent">
+					<h4 class="text-2xl font-josefin font-light" lang="en">Visual Generation </h4>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						<b>Discrete or continuous？</b> In mainstream perspectives, autoregressive models are typically associated with discrete representations. Since the essence of LLMs is to predict the next token, most vision generation models integrated with LLMs employ discrete processing approaches—predicting visual tokens from a codebook followed by decoding through a pretrained VQVAE. However, visual data is inherently continuous, and the forced conversion to discrete representations followed by decoding inevitably incurs information loss[@SuJianLinBiMenZaoCheZhiDuoMoTaiSiLuQianTanYiWuSunShuRu2024]. On the other hand, modern decoder-only LLMs process continuous features via token embeddings, and their outputs before the lm head detokenization are also continuous. This suggests that visual information can inherently be handled by LLM decoders in a continuous input-output manner without requiring explicit discretization.					</p>
+					</p>
+				</div>
+				<div class="md:col-span-5" id="imageContainer">
+					<div class="rounded-lg overflow-hidden">
+						<img src="diff1.png" alt="Architecture of the Diffusion model" class="w-full h-auto">
+					</div>
+					<br>
+					<p class="text-sm text-secondary text-center italic font-josefin" lang="en">
+						Architecture of the Diffusion model
+					</p>
+				</div>
+				<div class="md:col-span-7" id="textContent">
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						In this work, for the visual generation component, we adopt a structure similar to Transfusion[@zhouTransfusionPredictNext2024], utilizing the LLM backbone for both token prediction and visual diffusion. The diffusion objective is applied to predict image patches, where noise is added to each input image <span class="math-inline"> \(x_0\) </span>  following the diffusion process, and the model predicts either the noise or the vector field. During inference, at each time step, the noise or vector field is computed, and <span class="math-inline"> \(x_{t-1}\) </span> is derived via SDE or ODE solvers, iteratively replacing <span class="math-inline">\(x_t\)</span>until  <span class="math-inline">\(x_0\)</span> is generated. In this work, our method avoids discretizing visual features and eliminates the need for an additional pretrained VAE for encoding/decoding. 【Instead, we operate directly on raw image patches, with the diffusion process restoring the original patches. 】Pretrained VAEs are often limited by their training datasets and architectures, particularly in generating high-frequency details like text, where their performance tends to be suboptimal. While LDMs (Latent Diffusion Models) offer computational efficiency advantages during both training and inference, end-to-end training from scratch enhances the model’s capability in handling such data.
+					</p>
+				</div>
+				
+				<div class="md:col-span-12">
+					<h3 class="text-2xl font-josefin font-semibold mb-4" lang="en">Training Procedure</h3>
+					<p class="text-lg leading-relaxed font-josefin" lang="en">
+						Our framework employs distinct optimization objectives for visual understanding and generation tasks: an autoregressive objective <img src="result3.svg" alt="SVG Image" height="100" class="inline">, for visual understanding and a diffusion-based objective: <img src="result4.svg" alt="SVG Image" height="100" class="inline"> for visual generation. 					</p>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin" lang="en">
+						Owing to the decoupled design of the visual processing paths within our framework, we implement a phased training strategy. This allows the two tasks to be trained independently in the initial phase to achieve preliminary cross-modal data alignment, after which they are jointly trained. Given the substantial divergence in their optimization objectives, this segregated training approach significantly reduces the optimization difficulty compared to an end-to-end joint training regimen from the outset. Consequently, we structure the training procedure into three primary phases: 1) the Visual Understanding Training Phase, 2) the Visual Generation Training Phase, and 3) the Joint Training Phase. Each primary phase is further subdivided into specific stages to facilitate the refined optimization of different model components.					</p>
+				</div>
+				<div class="md:col-span-12" id="textContent">
+					<h4 class="text-2xl font-josefin font-light" lang="en">Multimodel Understanding Training </h4>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin" lang="en">
+						For the visual understanding training, we implement a progressive pipeline comprising three distinct stages:
+					</p>
+					<br>
+					<div class="rounded-lg overflow-hidden">
+						<img src="stage1.png" alt="stage1" class="w-full h-auto">
+					</div>
+					<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+						Multimodel Understanding Training Stage
+					</p>
+					
+					<br>
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						<b>Stage 1: </b>This stage focuses on achieving preliminary modality alignment. We freeze the weights of the backbone networks and train only the newly introduced adapter layers, which include the components connecting the visual encoder and the Large Language Model backbone: the Adapter, the Cross-Attention Gate, and the key-value projectors within the cross-attention layers. Training is conducted using the LLaVA-Pretrain[] dataset.
+					</p>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						<b>Stage 2: </b>This stage aims to adapt the visual encoder's feature extraction capabilities to better align with the language model's representations. Here, we train the visual encoder and all additional modules while keeping the parameters of the LLM backbone frozen. Although visual encoders are typically frozen in most research to preserve generalization and training stability, some studies suggest that careful fine-tuning can enhance model performance. For this stage, we randomly sample a subset of data from the COYO[] dataset and generate a synthetic dataset with a 1:1 ratio for training.
+					</p>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						<b>Stage 3: </b>This final stage is designed to train the model's instruction-following capabilities and prepare for integration with the subsequent generative module. We train all modules except the visual encoder. Crucially, to facilitate future merging, we employ LoRI[] for the LLM backbone—freezing its original weights and optimizing only the newly introduced low-rank matrices—while performing standard fine-tuning on the other modules. This stage utilizes the LLaVA-Instruct[] dataset for training.
+					</p>
+				</div>
+				<div class="md:col-span-12" id="textContent">
+					<h4 class="text-2xl font-josefin font-light" lang="en">Visual Generation Training </h4>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin" lang="en">
+						The training for the visual generation component is conducted over two stages:
+					</p>
+					<br>
+					<div class="rounded-lg overflow-hidden">
+						<img src="stage2.png" alt="stage2" class="w-full h-auto">
+					</div>
+					<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+						Visual Generation Training Stage
+					</p>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						<b>Stage 4: </b>In this stage, we freeze the weights of the backbone network and train only the newly initialized components—namely, the visual generation encoder and decoder, which follow a U-Net-like architecture. The objective of this phase is to achieve preliminary feature alignment between the visual generation modules and the language model. The model is trained on the ImageNet-1K dataset, with the output image resolution set to 128×128 pixels.
+					</p>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						<b>Stage 5: </b>This stage focuses on further enhancing the model's generative capability and its ability to follow instructions for image generation. Consequently, in addition to the visual generation encoder and decoder, we apply Low-Rank Adaptation to fine-tune the LLM backbone. Training is performed on a subset of N data points randomly sampled from dataset (a).
+					</p>
+				</div>
+				<div class="md:col-span-12" id="textContent">
+					<h4 class="text-2xl font-josefin font-light" lang="en">Mixed Training </h4>
+					<br>
+					<div class="rounded-lg overflow-hidden">
+						<img src="stage3.png" alt="stage2" class="w-1/2 h-auto mx-auto">
+					</div>
+					<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+						Mix Training Stage
+					</p>
+					<br>
+					<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+						Following the completion of the aforementioned five-stage training, the model has acquired foundational capabilities in both visual understanding and generation. Subsequently, joint training is conducted to integrate these two tasks. First, the incremental parameters learned via LoRA in Stage 3 and Stage 5 are concatenated and merged into the LLM backbone. In this final joint training stage, the consolidated model undergoes comprehensive fine-tuning, optimizing all parameters except those of the visual encoder. For data composition, the visual understanding component utilizes randomly sampled subsets from the datasets employed in Stage 2 and Stage 3. The visual generation component leverages a portion of the dataset from Stage 5, supplemented with an additional dataset (b). This strategy aims to enhance the model's image-to-image generation capability and its capacity for synergistic multimodal understanding.
+					</p>
+				</div>
+			</div>
+        </div>
+    </section>
+
+    <!-- 结果部分 -->
+    <section id="results" class="py-20 bg-white section-fade-in">
+        <div class="container mx-auto max-w-6xl px-4 md:px-8">
+            <span class="text-sm font-josefin uppercase tracking-widest text-accent" lang="en">Section 03</span>
+            <h2 class="text-3xl md:text-4xl font-josefin font-bold mt-2 mb-12" lang="en">Results & Analysis</h2>
+            <div class="md:col-span-12" id="textContent">
+				<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+					Due to the constraints that the diffusion model was trained on only 400,000 synthetic data samples and for an insufficient number of steps, its performance is not yet optimal. Therefore, this study refrains from any quantitative benchmarking against other mature models, and instead presents selected generated samples alongside qualitative analysis. Furthermore, limited by the experimental setup, comprehensive ablation studies were not conducted. The comparative analyses provided are primarily preliminary explorations of observed phenomena, and readers are advised to interpret these findings with caution.
+				</p>
+			</div>
+            <div class="md:col-span-12" id="textContent">
+				<div class="rounded-lg overflow-hidden">
+					<img src="output (1).png" alt="gen" class="w-full h-auto mx-auto">
+				</div>
+				<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+					Show some of the results generated
+				</p>
+			</div>
+			<div class="md:col-span-12" id="textContent">
+				<h3 class="text-2xl font-josefin font-semibold mb-4" lang="en">Visual Generation</h3>
+				<br>
+				<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+					The model training has progressed to Stage 5. Empirical results indicate that after approximately 60,000 training steps, the model achieves the generative performance illustrated in the accompanying figure. However, analysis reveals that the current model, built upon a 1.5B-parameter backbone, exhibits a relatively weak capability in generating legible text within images. We attribute this limitation primarily to the scarcity of training data explicitly containing textual information, with only about 10,000 relevant samples, constituting roughly 1/40th of the entire dataset.
+				</p>
+				<br>
+				<div class="rounded-lg overflow-hidden">
+					<img src="stage3.png" alt="stage2" class="w-1/2 h-auto mx-auto">
+				</div>
+				<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+					Mix Training Stage
+				</p>
+				<br>
+				<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+					The model exhibits certain limitations in generating human figures, stemming from the training protocol. Specifically, the ImageNet dataset used in Stage 4 lacks person categories, resulting in insufficient learning of human representations. While the CelebA dataset was introduced in Stage 5 to address this gap, it led to an imbalance in the data distribution. Consequently, the model overfits the portrait-style prompts prevalent in CelebA and underperforms on generating a broader spectrum of human figures.
+				</p>
+				<br>
+				<div class="rounded-lg overflow-hidden">
+					<img src="stage3.png" alt="stage2" class="w-1/2 h-auto mx-auto">
+				</div>
+				<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+					Mix Training Stage
+				</p>
+				<br>
+				<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+					Compared to visual generation models utilizing discrete representations, the continuous feature representation employed in our framework preserves richer detail. Comparing Janus with the same 1.5B backbone generates some detailed information.
+				</p>
+				<br>
+				<div class="rounded-lg overflow-hidden">
+					<img src="stage3.png" alt="stage2" class="w-1/2 h-auto mx-auto">
+				</div>
+				<p class="text-sm text-secondary italic font-josefin text-center" lang="en">
+					Mix Training Stage
+				</p>
+				<br>
+				<p class="text-lg leading-relaxed font-josefin balanced-text" lang="en">
+					A critical architectural finding concerns the role of skip connections. We observed that without skip connections between the encoder and decoder, the generative training failed to converge effectively, regardless of architectural complexity. In contrast, adopting a U-Net-like skip connection mechanism enabled rapid loss convergence within the first epoch, even when using simple residual blocks. We hypothesize that skip connections mitigate the suppression of high-frequency features (e.g., edges and contours) by dominant low-frequency information during deep feature extraction. A deeper investigation of this phenomenon is reserved for the discussion section.
+				</p>
+			</div>
+            
+        </div>
+    </section>
+
+    <!-- 讨论部分 -->
+    <section id="discussion" class="py-20 bg section-fade-in">
+        <div class="container mx-auto max-w-6xl px-4 md:px-8">
+            <span class="text-sm font-josefin uppercase tracking-widest text-accent" lang="en">Section 04</span>
+            <h2 class="text-3xl md:text-4xl font-josefin font-bold mt-2 mb-12" lang="en">discussion</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+                <div class="md:col-span-5">
+                    <div class="sticky top-32">
+                        <div class="mb-8">
+                            <img src="https://picsum.photos/id/169/600/800" alt="数据分析师讨论结果的场景" class="w-full h-auto rounded-lg shadow-lg mb-4">
+                            <p class="text-sm text-secondary italic font-josefin" lang="en">
+                                Data analysts reviewing and discussing preliminary results
+                            </p>
+                        </div>
+                        
+                        <div class="bg-light p-6 rounded-lg">
+                            <h3 class="text-xl font-josefin font-semibold mb-4" lang="en">Limitations</h3>
+                            <ul class="space-y-3 font-alimama" lang="zh">
+                                <li class="flex items-start">
+                                    <i class="fa fa-exclamation-circle text-accent mt-1 mr-2"></i>
+                                    <span>在极端小规模数据集上，模型优势不够明显</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa fa-exclamation-circle text-accent mt-1 mr-2"></i>
+                                    <span>初始训练时间较传统模型增加约30%</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa fa-exclamation-circle text-accent mt-1 mr-2"></i>
+                                    <span>对硬件配置有一定要求，低端设备适配需优化</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-7">
+                    <div class="space-y-8">
+                        <p class="text-lg leading-relaxed font-alimama" lang="zh">
+                            实验结果充分验证了新模型的优越性，特别是在处理大规模复杂数据时的效率与精度提升。值得注意的是，动态参数调整机制在不同场景下的自适应能力超出预期，这为模型的实际应用提供了更大的灵活性。
+                        </p>
+                        
+                        <p class="text-lg leading-relaxed font-josefin" lang="en">
+                            The experimental results fully validate the superiority of the new model, especially in terms of efficiency and accuracy improvements when processing large-scale complex data. Notably, the adaptive capability of the dynamic parameter adjustment mechanism in different scenarios exceeded expectations, providing greater flexibility for practical applications of the model.
+                        </p>
+                        
+                        <div class="border-l-4 border-primary pl-6 py-1 my-8">
+                            <p class="text-lg italic font-alimama" lang="zh">
+                                与同类研究相比，本模型在保持高精度的同时，显著降低了计算资源消耗，这一特性使其在资源受限的边缘计算环境中具有独特优势。
+                            </p>
+                        </div>
+                        
+                        <h3 class="text-2xl font-josefin font-semibold mb-4" lang="en">Practical Implications</h3>
+                        <p class="text-lg leading-relaxed font-alimama" lang="zh">
+                            从实际应用角度看，新模型的部署将带来多方面效益：首先，企业可在不增加硬件投入的情况下提升系统处理能力；其次，模型的高稳定性将减少运维成本；最后，快速响应能力有助于提升用户体验与业务竞争力。
+                        </p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+                            <div class="p-5 bg-light rounded-lg text-center">
+                                <div class="text-4xl text-accent mb-3">
+                                    <i class="fa fa-line-chart"></i>
+                                </div>
+                                <h4 class="font-josefin font-semibold mb-2" lang="en">Efficiency</h4>
+                                <p class="text-sm text-secondary font-alimama" lang="zh">
+                                    处理效率提升带来的直接成本节约
+                                </p>
+                            </div>
+                            
+                            <div class="p-5 bg-light rounded-lg text-center">
+                                <div class="text-4xl text-accent mb-3">
+                                    <i class="fa fa-shield"></i>
+                                </div>
+                                <h4 class="font-josefin font-semibold mb-2" lang="en">Reliability</h4>
+                                <p class="text-sm text-secondary font-alimama" lang="zh">
+                                    系统稳定性提升减少故障损失
+                                </p>
+                            </div>
+                            
+                            <div class="p-5 bg-light rounded-lg text-center">
+                                <div class="text-4xl text-accent mb-3">
+                                    <i class="fa fa-lightbulb-o"></i>
+                                </div>
+                                <h4 class="font-josefin font-semibold mb-2" lang="en">Innovation</h4>
+                                <p class="text-sm text-secondary font-alimama" lang="zh">
+                                    为新应用场景提供技术支撑
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 结论部分 -->
+    <section id="conclusion" class="py-20 bg-white section-fade-in">
+        <div class="container mx-auto max-w-6xl px-4 md:px-8">
+            <span class="text-sm font-josefin uppercase tracking-widest text-accent" lang="en">Section 05</span>
+            <h2 class="text-3xl md:text-4xl font-josefin font-bold mt-2 mb-12" lang="en">Future Work</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-16">
+                <div>
+                    <p class="text-lg leading-relaxed font-alimama mb-6" lang="zh">
+                        本研究提出的新一代系统模型在理论设计与实际应用中均展现出显著优势，通过创新的分层架构与动态调整机制，有效解决了传统模型面临的效率与精度瓶颈问题。实验数据充分证明了新方法的可行性与优越性。
+                    </p>
+                    
+                    <p class="text-lg leading-relaxed font-josefin mb-6" lang="en">
+                        The new generation system model proposed in this study demonstrates significant advantages in both theoretical design and practical applications. Through an innovative layered architecture and dynamic adjustment mechanism, it effectively addresses the efficiency and accuracy bottlenecks faced by traditional models. Experimental data fully demonstrates the feasibility and superiority of the new method.
+                    </p>
+                    
+                    <p class="text-lg leading-relaxed font-alimama" lang="zh">
+                        未来研究将聚焦于进一步优化模型的训练效率，拓展其在更多领域的应用，并探索与新兴技术如量子计算的结合可能性，以期推动系统建模技术的持续发展。
+                    </p>
+                </div>
+                
+                <div class="img-hover-zoom rounded-lg overflow-hidden shadow-xl">
+                    <img src="https://picsum.photos/id/111/1000/800" alt="未来技术概念图，展示模型应用的广阔前景" class="w-full h-auto">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 参考文献 -->
+    <section class="py-20 section-fade-in">
+        <div class="container mx-auto max-w-6xl px-4 md:px-8">
+            <h2 class="text-3xl font-josefin font-bold mb-10" lang="en">References</h2>
+            
+            <ul class="space-y-6 pl-4 border-l-2 border-gray-200">
+                <li class="font-josefin" lang="en">
+                    Smith, J., & Johnson, L. (2024). "Advancements in System Modeling for Large-Scale Data Processing." <em>Journal of Technical Innovation</em>, 18(3), 45-67.
+                </li>
+                <li class="font-josefin" lang="en">
+                    Zhang, H., et al. (2023). "Dynamic Parameter Adjustment in Complex Systems." <em>IEEE Transactions on Systems Engineering</em>, 55(2), 89-103.
+                </li>
+                <li class="font-alimama" lang="zh">
+                    王教授，李博士 (2022)。《现代系统建模理论与实践》。北京：科技出版社。
+                </li>
+                <li class="font-josefin" lang="en">
+                    Garcia, R., & Kim, S. (2021). "Layered Architecture Design for Enhanced System Scalability." <em>Proceedings of the International Conference on Computing and Engineering</em>, 1234-1245.
+                </li>
+                <li class="font-alimama" lang="zh">
+                    陈研究员等 (2020)。"复杂环境下自适应模型的构建与验证"，《计算机学报》，43(5)，876-890。
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 页脚 
+    <footer class="bg-primary text-white py-16">
+        <div class="container mx-auto max-w-6xl px-4 md:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
+                <div class="md:col-span-5">
+                    <div class="flex items-center space-x-1 mb-6">
+                        <span class="text-2xl font-josefin font-bold tracking-wider" lang="en">TECH REPORT</span>
+                        <span class="h-4 w-px bg-white/30 mx-2"></span>
+                        <span class="text-lg font-alimama" lang="zh">技术报告</span>
+                    </div>
+                    <p class="text-white/70 font-alimama mb-6" lang="zh">
+                        本报告由技术研究团队撰写，旨在分享前沿系统模型的研究成果，促进技术交流与创新。
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
+                            <i class="fa fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-3">
+                    <h3 class="text-lg font-josefin font-semibold mb-6" lang="en">Sections</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#intro" class="text-white/70 hover:text-white transition-colors font-josefin" lang="en">Introduction</a></li>
+                        <li><a href="#methodology" class="text-white/70 hover:text-white transition-colors font-josefin" lang="en">Methodology</a></li>
+                        <li><a href="#results" class="text-white/70 hover:text-white transition-colors font-josefin" lang="en">Results</a></li>
+                        <li><a href="#discussion" class="text-white/70 hover:text-white transition-colors font-alimama" lang="zh">讨论</a></li>
+                        <li><a href="#conclusion" class="text-white/70 hover:text-white transition-colors font-josefin" lang="en">Conclusion</a></li>
+                    </ul>
+                </div>
+                
+                
+            </div>
+            
+        </div>
+    </footer>
+	-->
+
+    <!-- 返回顶部按钮 -->
+    <button id="backToTop" class="fixed bottom-8 right-8 w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center shadow-lg opacity-0 invisible transition-all duration-300 hover:bg-accent/90">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        const backToTop = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) {
+                navbar.classList.add('bg-white', 'shadow-md', 'py-4');
+                navbar.classList.remove('py-6');
+                
+                backToTop.classList.remove('opacity-0', 'invisible');
+                backToTop.classList.add('opacity-100', 'visible');
+            } else {
+                navbar.classList.remove('bg-white', 'shadow-md', 'py-4');
+                navbar.classList.add('py-6');
+                
+                backToTop.classList.add('opacity-0', 'invisible');
+                backToTop.classList.remove('opacity-100', 'visible');
+            }
+            
+            // 滚动动画
+            const sections = document.querySelectorAll('.section-fade-in');
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (sectionTop < windowHeight * 0.75) {
+                    section.classList.add('section-visible');
+                }
+            });
+        });
+        
+        // 移动端菜单
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        menuToggle.addEventListener('click', function() {
+            if (mobileMenu.classList.contains('opacity-0')) {
+                mobileMenu.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                menuToggle.innerHTML = '<i class="fa fa-times"></i>';
+            } else {
+                mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+            }
+        });
+        
+        // 移动端菜单点击后关闭
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+            });
+        });
+        
+        // 返回顶部
+        backToTop.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 初始检查可见区域
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.section-fade-in');
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (sectionTop < windowHeight * 0.75) {
+                    section.classList.add('section-visible');
+                }
+            });
+        });
+    </script>
+	
+	<script>
+		function adjustLayout() {
+		  const textContent = document.getElementById('textContent');
+		  const imageContainer = document.getElementById('imageContainer');
+		  
+		  // 比较文本和图片的高度
+		  if (textContent.offsetHeight > imageContainer.offsetHeight) {
+			// 文本更长时，让文本占满整行
+			textContent.classList.remove('md:col-span-7');
+			textContent.classList.add('md:col-span-12');
+			imageContainer.classList.add('hidden'); // 隐藏原始图片容器
+			
+			// 在文本中插入图片（需要提前标记插入位置）
+			const insertPoint = document.getElementById('imageInsertPoint');
+			if (insertPoint && !document.getElementById('embeddedImage')) {
+			  const img = document.createElement('div');
+			  img.id = 'embeddedImage';
+			  img.className = 'my-8 md:col-span-5 mx-auto';
+			  img.innerHTML = imageContainer.innerHTML; // 复制图片内容
+			  insertPoint.parentNode.insertBefore(img, insertPoint);
+			}
+		  } else {
+			// 恢复默认布局
+			textContent.classList.add('md:col-span-7');
+			textContent.classList.remove('md:col-span-12');
+			imageContainer.classList.remove('hidden');
+			
+			const embeddedImg = document.getElementById('embeddedImage');
+			if (embeddedImg) embeddedImg.remove();
+		  }
+		}
+
+		// 初始化时检查
+		window.addEventListener('load', adjustLayout);
+		// 窗口大小变化时重新检查
+		window.addEventListener('resize', adjustLayout);
+    </script>
+	
+	<script>
+	MathJax = {
+	  chtml: {
+		font: "mathjax-tex", // 明确指定使用 MathJax TeX 字体
+		mtextFontInherit: false // 阻止文本元素继承外部字体 :cite[9]
+	  }
+	};
+	</script>
+	
+</body>
+</html>
